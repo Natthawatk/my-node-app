@@ -1,0 +1,39 @@
+import { Router } from 'express';
+import { validate } from '../middleware/validate.js';
+import { requireAuth } from '../middleware/auth.js';
+import { limitLogin } from '../middleware/rateLimit.js';
+import {
+  register, login, logout, me, changePassword, check
+} from '../controllers/auth.controller.js';
+
+const router = Router();
+
+// Validation shapes
+const registerShape = {
+  username: { required: true, type: 'string', regex: /^[a-zA-Z0-9_]{3,20}$/ },
+  email:    { required: true, type: 'string', regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+  password: { required: true, type: 'string' },
+  phone:    { required: false, type: 'string' },
+  full_name:{ required: false, type: 'string' },
+  role:     { required: false, type: 'string' } // 'customer' | 'rider' | 'admin'
+};
+
+const loginShape = {
+  phone: { required: true, type: 'string' },
+  password: { required: true, type: 'string' },
+};
+
+const changePassShape = {
+  currentPassword: { required: true, type: 'string' },
+  newPassword:     { required: true, type: 'string' },
+};
+
+// Routes
+router.post('/register', validate(registerShape), register);
+router.post('/login', limitLogin, validate(loginShape), login);
+router.post('/logout', requireAuth, logout);
+router.get('/me', requireAuth, me);
+router.patch('/password', requireAuth, validate(changePassShape), changePassword);
+router.get('/check', check);
+
+export default router;
