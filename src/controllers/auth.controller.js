@@ -51,7 +51,16 @@ export async function login(req, res) {
     const user = users[0];
     console.log('User found:', { user_id: user.user_id, phone: user.phone, role: user.role });
     
-    const isValid = await bcrypt.compare(password, user.password_hash);
+    // Check if password is hashed or plain text
+    let isValid = false;
+    if (user.password_hash.startsWith('$2')) {
+      // Hashed password
+      isValid = await bcrypt.compare(password, user.password_hash);
+    } else {
+      // Plain text password
+      isValid = password === user.password_hash;
+    }
+    
     console.log('Password valid:', isValid);
     
     if (!isValid) {

@@ -8,6 +8,7 @@
     "start": "node index.js",
     "dev": "nodemon src/app.js",
     "create-tables": "node create-tables.js",
+    "check-user": "node check-user.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
