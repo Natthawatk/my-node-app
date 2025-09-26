@@ -5,7 +5,7 @@ export async function register(req, res) {
   try {
     const { username, email, password, phone, full_name, role = 'customer' } = req.body;
     
-    const existingUser = await pool.query(
+    const [existingUser] = await pool.query(
       'SELECT id FROM users WHERE email = ? OR phone = ?', 
       [email, phone]
     );
@@ -16,7 +16,7 @@ export async function register(req, res) {
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const result = await pool.query(
+    const [result] = await pool.query(
       'INSERT INTO users (username, email, password, phone, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
       [username, email, hashedPassword, phone, full_name, role]
     );
@@ -26,6 +26,7 @@ export async function register(req, res) {
       user: { id: result.insertId, username, email, phone, full_name, role }
     });
   } catch (error) {
+    console.error('Register error:', error);
     res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
   }
 }
@@ -34,7 +35,7 @@ export async function login(req, res) {
   try {
     const { phone, password } = req.body;
     
-    const users = await pool.query(
+    const [users] = await pool.query(
       'SELECT * FROM users WHERE phone = ?', 
       [phone]
     );
@@ -63,6 +64,7 @@ export async function login(req, res) {
       } 
     });
   } catch (error) {
+    console.error('Login error:', error);
     res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
   }
 }

@@ -14,8 +14,10 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || true,
+  origin: ['https://my-node-app-lvf0.onrender.com', 'http://localhost:3000', 'http://localhost:*'],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(helmet());
 app.use(morgan('tiny'));
@@ -38,6 +40,7 @@ app.use(session({
   },
 }));
 
+app.get('/', (_req, res) => res.json({ message: 'API is running' }));
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 
