@@ -6,7 +6,7 @@ export async function register(req, res) {
     const { username, email, password, phone, full_name, role = 'customer' } = req.body;
     
     const [existingUser] = await pool.query(
-      'SELECT id FROM users WHERE email = ? OR phone = ?', 
+      'SELECT id FROM user WHERE email = ? OR phone = ?', 
       [email, phone]
     );
     
@@ -17,7 +17,7 @@ export async function register(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const [result] = await pool.query(
-      'INSERT INTO users (username, email, password, phone, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO user (username, email, password, phone, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
       [username, email, hashedPassword, phone, full_name, role]
     );
     
@@ -36,7 +36,7 @@ export async function login(req, res) {
     const { phone, password } = req.body;
     
     const [users] = await pool.query(
-      'SELECT * FROM users WHERE phone = ?', 
+      'SELECT * FROM user WHERE phone = ?', 
       [phone]
     );
     

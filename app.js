@@ -10,6 +10,30 @@ import authRoutes from './src/routes/auth.routes.js';
 
 dotenv.config();
 
+// Create tables if not exist
+async function initDatabase() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(50) UNIQUE NOT NULL,
+        email VARCHAR(100) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        phone VARCHAR(20) UNIQUE NOT NULL,
+        full_name VARCHAR(100),
+        role ENUM('customer', 'rider', 'admin') DEFAULT 'customer',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Database initialized');
+  } catch (error) {
+    console.error('Database init error:', error);
+  }
+}
+
+initDatabase();
+
 const app = express();
 
 app.use(express.json());
