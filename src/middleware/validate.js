@@ -1,23 +1,28 @@
-// ตัวอย่าง validator แบบง่าย ๆ
-export const validate =
-  (shape) => (req, res, next) => {
-    const data = req.method === 'GET' ? req.query : req.body;
-    console.log('Validation data:', data);
-    console.log('Validation shape:', shape);
+export function validate(shape) {
+  return (req, res, next) => {
     const errors = [];
-    for (const [key, rule] of Object.entries(shape)) {
-      const v = data[key];
-      if (rule.required && (v === undefined || v === null || v === '')) {
-        errors.push(`${key} is required`);
+    
+    for (const [field, rules] of Object.entries(shape)) {
+      const value = req.body[field];
+      
+      if (rules.required && (!value || value.toString().trim() === '')) {
+        errors.push(`${field} is required`);
         continue;
       }
-      if (v && rule.type && typeof v !== rule.type) {
-        errors.push(`${key} must be ${rule.type}`);
+      
+      if (value && rules.type && typeof value !== rules.type) {
+        errors.push(`${field} must be ${rules.type}`);
       }
-      if (v && rule.regex && !rule.regex.test(v)) {
-        errors.push(`${key} format invalid`);
+      
+      if (value && rules.regex && !rules.regex.test(value)) {
+        errors.push(`${field} format is invalid`);
       }
     }
-    if (errors.length) return res.status(400).json({ message: 'Validation error', errors });
-    return next();
+    
+    if (errors.length > 0) {
+      return res.status(400).json({ errors });
+    }
+    
+    next();
   };
+}
