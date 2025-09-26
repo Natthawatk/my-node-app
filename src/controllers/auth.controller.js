@@ -3,11 +3,11 @@ import { pool } from '../db/pool.js';
 
 export async function register(req, res) {
   try {
-    const { username, email, password, phone, full_name, role = 'customer' } = req.body;
+    const { phone, password, name, role = 'CUSTOMER' } = req.body;
     
     const [existingUser] = await pool.query(
-      'SELECT id FROM user WHERE email = ? OR phone = ?', 
-      [email, phone]
+      'SELECT user_id FROM user WHERE phone = ?', 
+      [phone]
     );
     
     if (existingUser.length > 0) {
@@ -17,13 +17,13 @@ export async function register(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     const [result] = await pool.query(
-      'INSERT INTO user (username, email, password, phone, full_name, role) VALUES (?, ?, ?, ?, ?, ?)',
-      [username, email, hashedPassword, phone, full_name, role]
+      'INSERT INTO user (phone, password_hash, name, role) VALUES (?, ?, ?, ?)',
+      [phone, hashedPassword, name, role]
     );
     
     res.status(201).json({ 
       message: 'สมัครสมาชิกสำเร็จ',
-      user: { id: result.insertId, username, email, phone, full_name, role }
+      user: { user_id: result.insertId, phone, name, role }
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -46,20 +46,19 @@ export async function login(req, res) {
     
     const user = users[0];
     
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await bcrypt.compare(password, user.password_hash);
     if (!isValid) {
       return res.status(401).json({ error: 'ข้อมูลไม่ถูกต้อง' });
     }
     
-    req.session.userId = user.id;
+    req.session.userId = user.user_id;
     
     res.json({ 
       message: 'เข้าสู่ระบบสำเร็จ', 
       user: { 
-        id: user.id, 
-        username: user.username,
-        email: user.email,
-        phone: user.phone, 
+        user_id: user.user_id, 
+        phone: user.phone,
+        name: user.name, 
         role: user.role 
       } 
     });

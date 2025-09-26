@@ -9,11 +9,9 @@ import {
 const router = Router();
 
 const registerShape = {
-  username: { required: true, type: 'string', regex: /^[a-zA-Z0-9_]{3,20}$/ },
-  email:    { required: true, type: 'string', regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
+  phone:    { required: true, type: 'string' },
   password: { required: true, type: 'string' },
-  phone:    { required: false, type: 'string' },
-  full_name:{ required: false, type: 'string' },
+  name:     { required: true, type: 'string' },
   role:     { required: false, type: 'string' }
 };
 
