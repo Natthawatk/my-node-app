@@ -34,20 +34,28 @@ export async function register(req, res) {
 export async function login(req, res) {
   try {
     const { phone, password } = req.body;
+    console.log('Login attempt:', { phone, password });
     
     const [users] = await pool.query(
       'SELECT * FROM user WHERE phone = ?', 
       [phone]
     );
     
+    console.log('Users found:', users.length);
+    
     if (users.length === 0) {
+      console.log('No user found with phone:', phone);
       return res.status(401).json({ error: 'ข้อมูลไม่ถูกต้อง' });
     }
     
     const user = users[0];
+    console.log('User found:', { user_id: user.user_id, phone: user.phone, role: user.role });
     
     const isValid = await bcrypt.compare(password, user.password_hash);
+    console.log('Password valid:', isValid);
+    
     if (!isValid) {
+      console.log('Invalid password for user:', phone);
       return res.status(401).json({ error: 'ข้อมูลไม่ถูกต้อง' });
     }
     
