@@ -36,10 +36,23 @@ export async function login(req, res) {
     const { phone, password } = req.body;
     console.log('Login attempt:', { phone, password });
     
-    const [users] = await pool.query(
-      'SELECT * FROM user WHERE phone = ?', 
-      [phone]
-    );
+    // Retry database query
+    let users;
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        [users] = await pool.query(
+          'SELECT * FROM user WHERE phone = ?', 
+          [phone]
+        );
+        break;
+      } catch (dbError) {
+        console.log('DB retry attempt:', 4 - retries, 'Error:', dbError.code);
+        retries--;
+        if (retries === 0) throw dbError;
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
     
     console.log('Users found:', users.length);
     

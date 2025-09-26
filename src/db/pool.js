@@ -10,8 +10,13 @@ export const pool = mysql.createPool({
   database: process.env.DB_NAME,
   ssl: process.env.DB_SSL === 'true',
   waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+  connectionLimit: 5,
+  queueLimit: 0,
+  acquireTimeout: 60000,
+  timeout: 60000,
+  reconnect: true,
+  idleTimeout: 300000,
+  maxIdle: 5
 });
 
 export const dbConnected = async () => {
