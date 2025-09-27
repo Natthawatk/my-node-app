@@ -41,6 +41,7 @@ app.use(session({
   },
 }));
 
+app.get('/', (_req, res) => res.json({ message: 'My Node App API', status: 'running' }));
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.use('/api/auth', authRoutes);
 
