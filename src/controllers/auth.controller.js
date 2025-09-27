@@ -37,24 +37,16 @@ export async function login(req, res) {
     const { phone, password } = req.body;
     console.log('Login attempt:', { phone, password });
     
-    // Retry database query
-    let users;
-    let retries = 3;
-    while (retries > 0) {
-      try {
-        const db = getDB();
-        users = await db.all(
-          'SELECT * FROM user WHERE phone = ?', 
-          [phone]
-        );
-        break;
-      } catch (dbError) {
-        console.log('DB retry attempt:', 4 - retries, 'Error:', dbError.code);
-        retries--;
-        if (retries === 0) throw dbError;
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+    const db = getDB();
+    if (!db) {
+      console.log('Database not initialized');
+      return res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
     }
+    
+    const users = await db.all(
+      'SELECT * FROM user WHERE phone = ?', 
+      [phone]
+    );
     
     console.log('Users found:', users ? users.length : 0);
     
