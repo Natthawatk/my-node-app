@@ -6,9 +6,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon src/app.js",
-    "create-tables": "node create-tables.js",
-    "check-user": "node check-user.js",
+    "dev": "nodemon src/index.js",
+    "seed": "node seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -16,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "connect-sqlite3": "^0.9.16",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
@@ -23,7 +23,9 @@
     "express-session": "^1.18.2",
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
-    "mysql2": "^3.15.1"
+    "mysql2": "^3.15.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

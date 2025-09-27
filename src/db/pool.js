@@ -1,28 +1,36 @@
-import mysql from 'mysql2/promise';
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: process.env.DB_SSL === 'true',
-  waitForConnections: true,
-  connectionLimit: 5,
-  queueLimit: 0,
-  acquireTimeout: 60000,
-  timeout: 60000,
-  reconnect: true,
-  idleTimeout: 300000,
-  maxIdle: 5
-});
+let db;
+
+export const initDB = async () => {
+  db = await open({
+    filename: './database.db',
+    driver: sqlite3.Database
+  });
+  
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS user (
+      user_id INTEGER PRIMARY KEY AUTOINCREMENT,
+      phone TEXT UNIQUE,
+      password_hash TEXT,
+      name TEXT,
+      role TEXT DEFAULT 'CUSTOMER'
+    )
+  `);
+  
+  console.log('SQLite database initialized');
+  return db;
+};
+
+export const getDB = () => db;
 
 export const dbConnected = async () => {
   try {
-    await pool.getConnection();
-    console.log('Database connected');
+    if (!db) await initDB();
     return true;
   } catch (error) {
     console.error('Database connection failed:', error);

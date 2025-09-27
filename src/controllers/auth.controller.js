@@ -1,29 +1,30 @@
 import bcrypt from 'bcryptjs';
-import { pool } from '../db/pool.js';
+import { getDB } from '../db/pool.js';
 
 export async function register(req, res) {
   try {
     const { phone, password, name, role = 'CUSTOMER' } = req.body;
     
-    const [existingUser] = await pool.query(
+    const db = getDB();
+    const existingUser = await db.get(
       'SELECT user_id FROM user WHERE phone = ?', 
       [phone]
     );
     
-    if (existingUser.length > 0) {
+    if (existingUser) {
       return res.status(400).json({ error: 'ผู้ใช้นี้มีอยู่แล้ว' });
     }
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const [result] = await pool.query(
+    const result = await db.run(
       'INSERT INTO user (phone, password_hash, name, role) VALUES (?, ?, ?, ?)',
       [phone, hashedPassword, name, role]
     );
     
     res.status(201).json({ 
       message: 'สมัครสมาชิกสำเร็จ',
-      user: { user_id: result.insertId, phone, name, role }
+      user: { user_id: result.lastID, phone, name, role }
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -41,7 +42,8 @@ export async function login(req, res) {
     let retries = 3;
     while (retries > 0) {
       try {
-        [users] = await pool.query(
+        const db = getDB();
+        users = await db.all(
           'SELECT * FROM user WHERE phone = ?', 
           [phone]
         );
@@ -54,9 +56,9 @@ export async function login(req, res) {
       }
     }
     
-    console.log('Users found:', users.length);
+    console.log('Users found:', users ? users.length : 0);
     
-    if (users.length === 0) {
+    if (!users || users.length === 0) {
       console.log('No user found with phone:', phone);
       return res.status(401).json({ error: 'ข้อมูลไม่ถูกต้อง' });
     }
