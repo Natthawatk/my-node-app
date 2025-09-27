@@ -22,6 +22,18 @@ export const initDB = async () => {
     )
   `);
   
+  // Create default user if not exists
+  const existingUser = await db.get('SELECT user_id FROM user WHERE phone = ?', ['0911234567']);
+  if (!existingUser) {
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.default.hash('1234', 10);
+    await db.run(
+      'INSERT INTO user (phone, password_hash, name, role) VALUES (?, ?, ?, ?)',
+      ['0911234567', hashedPassword, 'Default User', 'CUSTOMER']
+    );
+    console.log('✓ Default user created');
+  }
+  
   console.log('SQLite database initialized');
   return db;
 };
