@@ -3,6 +3,7 @@ node_modules/
 *.db
 *.sqlite
 *.sqlite3
+seed.js
 sqlite3.exe
 .DS_Store
 logs/
