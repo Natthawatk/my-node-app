@@ -4,8 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import session from 'express-session';
-import MySQLStoreFactory from 'express-mysql-session';
-import { pool } from './src/db/pool.js';
+import connectSqlite3 from 'connect-sqlite3';
+import { initDB } from './src/db/pool.js';
 import authRoutes from './src/routes/auth.routes.js';
 
 dotenv.config();
@@ -20,8 +20,11 @@ app.use(cors({
 app.use(helmet());
 app.use(morgan('tiny'));
 
-const MySQLStore = MySQLStoreFactory(session);
-const sessionStore = new MySQLStore({}, pool);
+const SQLiteStore = connectSqlite3(session);
+const sessionStore = new SQLiteStore({ db: 'sessions.db' });
+
+// Initialize database
+await initDB();
 
 app.set('trust proxy', 1);
 app.use(session({
