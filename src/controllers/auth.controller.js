@@ -6,25 +6,25 @@ export async function register(req, res) {
     const { phone, password, name, role = 'CUSTOMER' } = req.body;
     
     const db = getDB();
-    const existingUser = await db.get(
+    const [existingUser] = await db.execute(
       'SELECT user_id FROM user WHERE phone = ?', 
       [phone]
     );
     
-    if (existingUser) {
+    if (existingUser.length > 0) {
       return res.status(400).json({ error: 'ผู้ใช้นี้มีอยู่แล้ว' });
     }
     
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    const result = await db.run(
+    const [result] = await db.execute(
       'INSERT INTO user (phone, password_hash, name, role) VALUES (?, ?, ?, ?)',
       [phone, hashedPassword, name, role]
     );
     
     res.status(201).json({ 
       message: 'สมัครสมาชิกสำเร็จ',
-      user: { user_id: result.lastID, phone, name, role }
+      user: { user_id: result.insertId, phone, name, role }
     });
   } catch (error) {
     console.error('Register error:', error);
@@ -43,7 +43,7 @@ export async function login(req, res) {
       return res.status(500).json({ error: 'เกิดข้อผิดพลาด' });
     }
     
-    const users = await db.all(
+    const [users] = await db.execute(
       'SELECT * FROM user WHERE phone = ?', 
       [phone]
     );
